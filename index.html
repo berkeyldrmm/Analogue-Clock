@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Clock</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="hour" id="12">12</div><div class="hour">1</div><div class="hour">2</div><div class="hour">3</div><div class="hour">4</div><div class="hour">5</div><div class="hour">6</div><div class="hour">7</div><div class="hour">8</div><div class="hour">9</div><div class="hour">10</div><div class="hour">11</div>
+    <canvas id="canvas" width="1350" height="700"></canvas>
+    <script src="main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/2.1.1/rough.js" integrity="sha512-sZtT5AmC0DFqxtF/WG8fUVvsum8ZkIoHa08hQO5css2CRXZrvMt9DwMZ4hFNQZiJtwZnmc413p/msPhYMyjlPA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        var canvas=document.getElementById('canvas');
+        var screen=canvas.getContext("2d");
+        var clock=rough.canvas(canvas);
+        var hours=document.querySelectorAll(".hour");
+        setInterval(function() {
+                clearClock();
+                drawClock();
+                drawMinutesandHoursLine();
+                lighting();
+        },1000)
+        var clearClock=()=>{
+            screen.beginPath();
+            screen.fillStyle="#C9CECC";
+            screen.fillRect(0,0,canvas.width,canvas.height);
+            screen.closePath();
+            screen.fill();
+        }
+        var drawClock=()=>{
+            clock.circle(canvas.width/2,canvas.height/2, canvas.width/2,{
+                fill:"#0E2320",
+                fillWieght:4,
+                hachureGap: 6,
+                roughness: 0.7
+            });
+            clock.circle(canvas.width/2,canvas.height/2, 15, {
+                fill:"#F2E203",
+                style:"solid"
+            });
+            for(i=0;i<60;i++){
+                if(i%5==0){
+                    continue;
+                }
+                else{
+                    clock.line(canvas.width/2+canvas.width/4*Math.sin(i*Math.PI/30),canvas.height/2-canvas.width/4*Math.cos(i*Math.PI/30),(canvas.width/2)+(29*canvas.width*Math.sin(i*Math.PI/30))/120,(canvas.height/2)-(29*canvas.width*Math.cos(i*Math.PI/30))/120);
+                }
+            }
+            hours.forEach(element => {
+                element.style.position="absolute";
+                let x=parseInt(element.innerHTML)%12;
+                let positionX=canvas.width/2+canvas.width/4*Math.sin(x*Math.PI/6)+67;
+                let positionY=canvas.height/2-canvas.width/4*Math.cos(x*Math.PI/6);
+                element.style.left=positionX.toString()+"px";
+                element.style.top=positionY.toString()+"px";
+            });
+        }
+        var drawMinutesandHoursLine=()=>{
+            let date=new Date();
+            let second=date.getSeconds();
+            let minute=date.getMinutes();
+            let hour=date.getHours();
+            clock.line(canvas.width/2,canvas.height/2,canvas.width/2+canvas.width/4*Math.sin(second*Math.PI/30),canvas.height/2-canvas.width/4*Math.cos(second*Math.PI/30));
+            clock.line(canvas.width/2,canvas.height/2,canvas.width/2+3*(canvas.width/4*Math.sin(minute*Math.PI/30))/4,canvas.height/2-3*(canvas.width/4*Math.cos(minute*Math.PI/30))/4);
+            clock.line(canvas.width/2,canvas.height/2,canvas.width/2+(canvas.width/4*Math.sin((hour%12)*Math.PI/6+minute*Math.PI/360))/2,canvas.height/2-(canvas.width/4*Math.cos((hour%12)*Math.PI/6+(minute*Math.PI/360)))/2);
+            
+        }
+        var lighting=()=>{
+            let date=new Date();
+            let second=date.getSeconds();
+            if(second%5==0){
+                hours.forEach(element => {
+                    if(element.innerHTML==(second/5).toString()){
+                        element.style.backgroundColor="#F2E203";
+                        element.style.color="#fff";
+                        setTimeout(() => {
+                            element.style.backgroundColor="#AFC5B6";
+                            element.style.color="#248232";
+                        }, 1000);
+                    }
+                    else if(second/5==0){
+                        let element=document.getElementById("12");
+                        element.style.backgroundColor="#F2E203";
+                        element.style.color="#F5F5F5";
+                        setTimeout(() => {
+                            element.style.backgroundColor="#AFC5B6";
+                            element.style.color="#248232";
+                        }, 1000);
+                    }
+                });
+            }
+        }
+        window.onload(drawClock());
+    </script>
+</body>
+</html>
